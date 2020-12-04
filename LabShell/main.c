@@ -16,7 +16,6 @@ int main() {
     char *filename = NULL;
     ssize_t bufsize = 0;
     while((bufsize = getline(&buf, &len, stdin)) != 0){
-        printf("%ld", len);
         redir = 0;
         buf[strlen(buf) - 1] = '\0';
         if(strcmp(buf, "exit") == 0){
