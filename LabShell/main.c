@@ -5,18 +5,21 @@
 #include <wait.h>
 #include <signal.h>
 
-void exec(char**, int, char*);
+void exec(char**, int, int, char*, char*);
 
 int main() {
-    int redir = 0;
+    int redir_in = 0, redir_out = 0;
+    int j = 0;
+    int size = 0;
     pid_t main_pid = getpid();
     size_t len = 0;
     char *buf;
-    char *args[32];
-    char *filename = NULL;
+    char filename_out[32];
+    char filename_in[32];
     ssize_t bufsize = 0;
     while((bufsize = getline(&buf, &len, stdin)) != 0){
-        redir = 0;
+        char *args[32];
+        char *arg[32];
         buf[strlen(buf) - 1] = '\0';
         if(strcmp(buf, "exit") == 0){
             kill(main_pid, 2);
@@ -25,11 +28,37 @@ int main() {
             args[i] = strsep(&buf, " ");
             if(args[i] == NULL)
                 break;
+            size++;
             if(strlen(args[i]) == 0)
                 i--;
-        }   
+        }
+        for(int i = 0; i < size; i++){
+            if(args[i] != NULL){
+                if(strcmp(args[i], ">") == 0){
+                    redir_out = 1;
+                    i++;
+                    strcpy(filename_out, args[i]);
+                    continue;
+                }
+                if(strcmp(args[i], "<") == 0){
+                    redir_in = 1;
+                    i++;
+                    strcpy(filename_in, args[i]);
+                    continue;
+                }
+                arg[j] = args[i];
+                j++;
+            }
+            else{
+                break;
+            }
+        }
         free(buf);
-        exec(args, redir, filename);
+        exec(arg, redir_out, redir_in, filename_out, filename_in);
+        size = 0;
+        j = 0;
+        bzero(filename_out, 32);
+        bzero(filename_in, 32);
     }
     
     return 0;
