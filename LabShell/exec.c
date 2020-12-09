@@ -12,7 +12,7 @@ void exec(char** args, int redir_out, int redir_in, const char* filename_out, co
     pid = fork();
     if(pid == 0){
         if(redir_out == 1){
-            fd_out = open(filename_out, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IRGRP);
+            fd_out = open(filename_out, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP);
             dup2(fd_out, 1);
         }
         if(redir_in == 1){

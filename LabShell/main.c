@@ -59,6 +59,10 @@ int main() {
         j = 0;
         bzero(filename_out, 32);
         bzero(filename_in, 32);
+        for(int i = 0; i < 32; i++){
+            args[i] = NULL;
+            arg[i] = NULL;
+        }
     }
     
     return 0;
