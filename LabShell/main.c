@@ -5,11 +5,14 @@
 #include <wait.h>
 #include <signal.h>
 
+#include "include/swapper.h"
+
 void exec(char**, int, int, char*, char*);
 
 int main() {
     int redir_in = 0, redir_out = 0;
     int j = 0;
+    int inner = 0;
     int size = 0;
     pid_t main_pid = getpid();
     size_t len = 0;
@@ -18,6 +21,7 @@ int main() {
     char filename_in[32];
     ssize_t bufsize = 0;
     while((bufsize = getline(&buf, &len, stdin)) != 0){
+        inner = 0;
         char *args[32];
         char *arg[32];
         buf[strlen(buf) - 1] = '\0';
@@ -46,6 +50,11 @@ int main() {
                     strcpy(filename_in, args[i]);
                     continue;
                 }
+                if(strcmp(args[0], "swap") == 0 && args[2] != NULL){
+                    swap_files(args[1], args[2]);
+                    inner = 1;
+                    break;
+                }
                 arg[j] = args[i];
                 j++;
             }
@@ -54,7 +63,9 @@ int main() {
             }
         }
         free(buf);
-        exec(arg, redir_out, redir_in, filename_out, filename_in);
+        if(inner == 0){
+            exec(arg, redir_out, redir_in, filename_out, filename_in);
+        }
         size = 0;
         j = 0;
         bzero(filename_out, 32);
