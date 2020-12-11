@@ -5,7 +5,7 @@
 #include <wait.h>
 #include <signal.h>
 
-#include "swapper.h"
+#include "include/swapper.h"
 
 void exec(char**, int, int, char*, char*);
 
