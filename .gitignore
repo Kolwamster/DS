@@ -1,0 +1,8 @@
+exec.o
+libswapper.a
+main.o
+swap_files.o
+swap.o
+transfer.o
+libexec.so
+badsh
