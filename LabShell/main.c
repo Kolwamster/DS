@@ -4,12 +4,13 @@
 #include <unistd.h>
 #include <wait.h>
 #include <signal.h>
+#include <dlfcn.h>
 
 #include "include/swapper.h"
 
-void exec(char**, int, int, char*, char*);
-
 int main() {
+    void *handle;
+    void (*exec)(char**, int, int, const char*, const char*);
     int redir_in = 0, redir_out = 0;
     int j = 0;
     int inner = 0;
@@ -17,9 +18,23 @@ int main() {
     pid_t main_pid = getpid();
     size_t len = 0;
     char *buf;
+    char *error;
     char filename_out[32];
     char filename_in[32];
     ssize_t bufsize = 0;
+
+    handle = dlopen("libexec.so", RTLD_LAZY);
+    if (!handle) {
+        error = dlerror();
+        fprintf (stderr, "%s\n", error);
+        exit(1);
+    }
+    exec = dlsym(handle, "exec");
+    if ((error = dlerror()) != NULL)  {
+        fprintf (stderr, "%s\n", error);
+        exit(1);
+    }
+
     while((bufsize = getline(&buf, &len, stdin)) != 0){
         inner = 0;
         char *args[32];
@@ -64,7 +79,7 @@ int main() {
         }
         free(buf);
         if(inner == 0){
-            exec(arg, redir_out, redir_in, filename_out, filename_in);
+            (*exec)(arg, redir_out, redir_in, filename_out, filename_in);
         }
         size = 0;
         j = 0;
@@ -75,6 +90,7 @@ int main() {
             arg[i] = NULL;
         }
     }
-    
+
+    dlclose(handle);
     return 0;
 }
