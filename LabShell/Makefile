@@ -1,5 +1,5 @@
 badsh: main.o exec.so libswapper.a
-	gcc -Wall main.o -L. -lexec -lswapper -o badsh
+	gcc -Wall main.o -ldl -L. -lswapper -o badsh
 
 libswapper.a: swap.o transfer.o swap_files.o
 	ar -rs libswapper.a swap.o transfer.o swap_files.o
