@@ -1,5 +1,5 @@
-badsh: main.o exec.o libswapper.so
-	gcc -Wall exec.o main.o -ldl -o badsh
+badsh: main.o exec.o exec_pipe.o libswapper.so
+	gcc -Wall exec.o exec_pipe.o main.o -ldl -o badsh
 
 libswapper.so: swap.o transfer.o swap_files.o
 	gcc -Wall -shared swap.o transfer.o swap_files.o -o libswapper.so
@@ -12,6 +12,9 @@ transfer.o: transfer.c
 
 swap.o: swap.c
 	gcc -Wall -fPIC swap.c -c -o swap.o
+
+exec_pipe.o: exec_pipe.c
+	gcc -Wall exec_pipe.c -c -o exec_pipe.o
 
 exec.o: exec.c
 	gcc -Wall exec.c -c -o exec.o
