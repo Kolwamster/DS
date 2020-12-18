@@ -1,4 +1,5 @@
 exec.o
+exec_pipe.o
 libswapper.a
 libswapper.so
 main.o
