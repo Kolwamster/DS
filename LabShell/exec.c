@@ -14,12 +14,10 @@ void exec(char** args, int redir_out, int redir_in, const char* filename_out, co
         if(redir_out == 1){
             fd_out = open(filename_out, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP);
             dup2(fd_out, 1);
-            close(fd_out);
         }
         if(redir_in == 1){
             fd_in = open(filename_in, O_RDONLY, S_IRUSR | S_IRGRP);
             dup2(fd_in, 0);
-            close(fd_in);
         }
         if(execvp(args[0], args) < 0){
             printf("Can't start this process\n");

@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "swapper.h"
+#include "include/swapper.h"
 
 void swap(int swapstep, int *fd1, int *fd2, int ind)
 {

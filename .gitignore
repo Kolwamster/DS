@@ -1,5 +1,6 @@
 exec.o
 libswapper.a
+libswapper.so
 main.o
 swap_files.o
 swap.o
