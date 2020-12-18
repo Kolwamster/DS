@@ -22,7 +22,7 @@ int swap_files(const char* pathname1, const char* pathname2)
 	}
 	if(fd2 == -1)
 	{
-		write(0, "can't open file 1\n", 18);
+		write(0, "can't open file 2\n", 18);
 		close(fd1);
 		close(fd2);
 		return -1;

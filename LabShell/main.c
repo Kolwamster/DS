@@ -6,7 +6,7 @@
 #include <signal.h>
 #include <dlfcn.h>
 
-#include "include/swapper.h"
+//#include "include/swapper.h"
 
 void exec(char**, int, int, const char*, const char*);
 
@@ -21,6 +21,9 @@ int main() {
     char filename_out[32];
     char filename_in[32];
     ssize_t bufsize = 0;
+    void *handle_swapper;
+    int (*swap_files)(const char*, const char*);
+    char *error;
 
     while((bufsize = getline(&buf, &len, stdin)) != 0){
         inner = 0;
@@ -59,8 +62,19 @@ int main() {
                     continue;
                 }
                 if(strcmp(args[0], "swap") == 0 && args[2] != NULL){
-                    swap_files(args[1], args[2]);
+                    handle_swapper = dlopen("./libswapper.so", RTLD_LAZY);
+                    if(!handle_swapper) {
+                        fputs(dlerror(), stderr);
+                        exit(1);
+                    }
+                    swap_files = dlsym(handle_swapper, "swap_files");
+                    if ((error = dlerror()) != NULL){
+                        fputs(error, stderr);
+                        exit(1);
+                    }
+                    (*swap_files)(args[1], args[2]);
                     inner = 1;
+                    dlclose(handle_swapper);
                     break;
                 }
                 arg[j] = args[i];
