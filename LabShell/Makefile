@@ -1,23 +1,26 @@
-badsh: main.o exec.so libswapper.a
-	gcc -Wall main.o -L. -lexec -lswapper -o badsh
+badsh: main.o exec.o libswapper.so
+	gcc -Wall exec.o main.o -ldl -o badsh
 
-libswapper.a: swap.o transfer.o swap_files.o
-	ar -rs libswapper.a swap.o transfer.o swap_files.o
+libswapper.so: swap.o transfer.o swap_files.o
+	gcc -Wall -shared swap.o transfer.o swap_files.o -o libswapper.so
 
 swap_files.o: swap_files.c
-	gcc -Wall swap_files.c -c -o swap_files.o
+	gcc -Wall -fPIC swap_files.c -c -o swap_files.o
 
 transfer.o: transfer.c
-	gcc -Wall transfer.c -c -o transfer.o
+	gcc -Wall -fPIC transfer.c -c -o transfer.o
 
 swap.o: swap.c
-	gcc -Wall swap.c -c -o swap.o
+	gcc -Wall -fPIC swap.c -c -o swap.o
 
 exec.o: exec.c
-	gcc -Wall -fPIC exec.c -c -o exec.o
-
-exec.so: exec.o
-	gcc -Wall -shared exec.o -o libexec.so
+	gcc -Wall exec.c -c -o exec.o
 
 main.o: main.c
 	gcc -Wall main.c -c -o main.o
+
+clean_txt:
+	rm *.txt
+
+clean_obj:
+	rm *.o
