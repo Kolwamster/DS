@@ -52,6 +52,12 @@ int main() {
                     strcpy(filename_in, args[i]);
                     continue;
                 }
+                if(strcmp(args[i], ">>") == 0){
+                    redir_out = 2;
+                    i++;
+                    strcpy(filename_out, args[i]);
+                    continue;
+                }
                 if(strcmp(args[0], "swap") == 0 && args[2] != NULL){
                     swap_files(args[1], args[2]);
                     inner = 1;
@@ -70,6 +76,8 @@ int main() {
         }
         size = 0;
         j = 0;
+        redir_in = 0;
+        redir_out = 0;
         bzero(filename_out, 32);
         bzero(filename_in, 32);
         for(int i = 0; i < 32; i++){

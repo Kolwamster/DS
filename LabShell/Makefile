@@ -18,3 +18,9 @@ exec.o: exec.c
 
 main.o: main.c
 	gcc -Wall main.c -c -o main.o
+
+clean_txt:
+	rm *.txt
+
+clean_obj:
+	rm *.o
