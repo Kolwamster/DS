@@ -5,6 +5,9 @@
 #include <wait.h>
 #include <signal.h>
 #include <dlfcn.h>
+#include <errno.h>
+
+#define BUF_SIZE 128
 
 void exec(char**, int, int, const char*, const char*);
 void exec_pipe(char**, char**, int, int, const char*, const char*);
@@ -24,6 +27,11 @@ int main() {
     void *handle_swapper;
     int (*swap_files)(const char*, const char*);
     char *error;
+    char *cwd;
+
+    cwd = (char*)malloc(BUF_SIZE);
+    getcwd(cwd, BUF_SIZE);   
+    printf("%s>", cwd);
 
     while((bufsize = getline(&buf, &len, stdin)) != 0){
         char *args[32];
@@ -65,7 +73,35 @@ int main() {
                     piped = 1;
                     continue;
                 }
+                if(strcmp(args[0], "cd") == 0){
+                    inner = 1;
+                    if(args[1] != NULL){
+                        chdir(args[1]);
+                    }
+                    else{
+                        chdir("/");
+                    }
+                    break;
+                }
+                if(strcmp(args[0], "setuid") == 0 && args[1] != NULL){
+                    char *end;
+                    uid_t tmp = strtol(args[1], &end, 16);
+                    setuid(tmp);
+                    break;
+                }
+                if(strcmp(args[0], "getuid") == 0){
+                    uid_t tmp = geteuid();
+                    printf("%d\n", tmp);
+                    break;
+                }
+                if(strcmp(args[0], "chroot") == 0 && args[1] != NULL){
+                    inner = 1;
+                    chroot(args[1]);
+                    printf("%s\n", strerror(errno));
+                    break;
+                }
                 if(strcmp(args[0], "swap") == 0 && args[2] != NULL){
+                    inner = 1;
                     handle_swapper = dlopen("./libswapper.so", RTLD_LAZY);
                     if(!handle_swapper) {
                         fputs(dlerror(), stderr);
@@ -77,7 +113,6 @@ int main() {
                         exit(1);
                     }
                     (*swap_files)(args[1], args[2]);
-                    inner = 1;
                     dlclose(handle_swapper);
                     break;
                 }
@@ -115,6 +150,13 @@ int main() {
             arg[i] = NULL;
             arg2[i] = NULL;
         }
+        free(cwd);
+        cwd = (char*)malloc(BUF_SIZE);
+        getcwd(cwd, BUF_SIZE);   
+        printf("%s>", cwd);
     }
+
+    free(cwd);
+
     return 0;
 }
