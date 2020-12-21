@@ -24,10 +24,11 @@ int main() {
     char filename_out[32];
     char filename_in[32];
     ssize_t bufsize = 0;
-    void *handle_swapper;
-    int (*swap_files)(const char*, const char*);
-    char *error;
     char *cwd;
+    void *handle_plugin;
+    char *error;
+    char *plug_name;
+    void (*execute)(char**, int);
 
     cwd = (char*)malloc(BUF_SIZE);
     getcwd(cwd, BUF_SIZE);   
@@ -83,39 +84,54 @@ int main() {
                     }
                     break;
                 }
-                if(strcmp(args[0], "setuid") == 0 && args[1] != NULL){
-                    char *end;
-                    uid_t tmp = strtol(args[1], &end, 16);
-                    setuid(tmp);
-                    break;
-                }
-                if(strcmp(args[0], "getuid") == 0){
-                    uid_t tmp = geteuid();
-                    printf("%d\n", tmp);
-                    break;
-                }
                 if(strcmp(args[0], "chroot") == 0 && args[1] != NULL){
                     inner = 1;
                     chroot(args[1]);
                     printf("%s\n", strerror(errno));
                     break;
                 }
-                if(strcmp(args[0], "swap") == 0 && args[2] != NULL){
+                if(strcmp(args[0], "plugin") == 0 && args[1] != NULL){
                     inner = 1;
-                    handle_swapper = dlopen("./libswapper.so", RTLD_LAZY);
-                    if(!handle_swapper) {
+                    handle_plugin = dlopen(args[1], RTLD_LAZY);
+                    if(!handle_plugin) {
                         fputs(dlerror(), stderr);
                         exit(1);
                     }
-                    swap_files = dlsym(handle_swapper, "swap_files");
+                    char* (*get_plug_name)();
+                    execute = dlsym(handle_plugin, "execute");
+                    get_plug_name = dlsym(handle_plugin, "get_plug_name");
+                    plug_name = get_plug_name();
+                    printf("plugged %s\n", plug_name);
                     if ((error = dlerror()) != NULL){
                         fputs(error, stderr);
                         exit(1);
                     }
-                    (*swap_files)(args[1], args[2]);
-                    dlclose(handle_swapper);
                     break;
                 }
+                if(plug_name != NULL && strcmp(args[0], plug_name) == 0){
+
+                    inner = 1;
+                    for(int q = 1; q < 32; q++){
+                        if(args[q] == NULL){
+                            break;
+                        }
+                        arg[j] = args[q];
+                        j++;
+                    }
+
+                    execute(arg, j);
+                    break;
+                }
+                /*if(strcmp(args[0], "unplug") == 0 && args[1] != NULL){
+                    inner = 1;
+                    if(strcmp(args[1], plug_name) == 0){
+                        dlclose(handle_plugin);
+                        printf("unplugged %s\n", plug_name);
+                        plug_name = NULL;
+                        execute = NULL;
+                    }
+                    break;
+                }*/
                 if(piped == 0){
                     arg[j] = args[i];
                     j++;
