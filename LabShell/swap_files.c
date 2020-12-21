@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "include/swapper.h"
 
-int swap_files(const char* pathname1, const char* pathname2)
+static int swap_files(const char* pathname1, const char* pathname2)
 {
 	const int step = 8;
 	int i = 0;
@@ -80,4 +82,15 @@ int swap_files(const char* pathname1, const char* pathname2)
 	close(fd1);
 	close(fd2);
 	return 0;
+}
+
+void execute(char** args, int argc){
+	if(args[0] == NULL || args[1] == NULL){
+		printf("arguments error\n");
+	}
+	swap_files(args[0], args[1]);
+}
+
+const char* get_plug_name(){
+	return "swap_files";
 }
